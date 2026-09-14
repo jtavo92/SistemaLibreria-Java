@@ -8,6 +8,15 @@ public class Pedido {
     private int cantidad;
 
     public Pedido(int id, Cliente cliente, Producto producto, int cantidad) {
+        if (id <= 0) {
+            throw new IllegalArgumentException("el ID debe ser mayor que cero.");
+        }
+        if (cliente == null || producto == null) {
+            throw new IllegalArgumentException("el pedido necesita cliente y producto.");
+        }
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("la cantidad debe ser mayor que cero.");
+        }
         this.id = id;
         this.cliente = cliente;
         this.producto = producto;
@@ -38,7 +47,8 @@ public class Pedido {
         System.out.println("ID Pedido: " + id);
         System.out.println("Cliente: " + cliente.getNombre());
         System.out.println("Producto: " + producto.getNombre());
+        System.out.println("Precio unitario: S/ " + producto.getPrecio());
         System.out.println("Cantidad: " + cantidad);
-        System.out.println("Subtotal: S/ " + calcularSubtotal());
+        System.out.println("Importe total: S/ " + calcularSubtotal());
     }
 }

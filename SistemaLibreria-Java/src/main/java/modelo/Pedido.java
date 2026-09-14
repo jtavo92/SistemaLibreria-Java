@@ -7,6 +7,10 @@ public class Pedido {
     private Producto producto;
     private int cantidad;
 
+    public Pedido(int id, Cliente cliente, Producto producto) {
+        this(id, cliente, producto, 1);
+    }
+
     public Pedido(int id, Cliente cliente, Producto producto, int cantidad) {
         if (id <= 0) {
             throw new IllegalArgumentException("el ID debe ser mayor que cero.");
@@ -41,6 +45,13 @@ public class Pedido {
 
     public double calcularSubtotal() {
         return producto.getPrecio() * cantidad;
+    }
+
+    public double calcularSubtotal(int cantidadSolicitada) {
+        if (cantidadSolicitada <= 0) {
+            throw new IllegalArgumentException("la cantidad debe ser mayor que cero.");
+        }
+        return producto.getPrecio() * cantidadSolicitada;
     }
 
     public void mostrarDatos() {

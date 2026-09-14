@@ -3,6 +3,8 @@ package menu;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import modelo.Cliente;
 import modelo.Pedido;
 import modelo.Producto;
@@ -14,10 +16,10 @@ public class Menu {
 
     public static void mostrarMenu() {
         Scanner scanner = new Scanner(System.in);
-        List<Producto> productos = new ArrayList<>();
+        Map<Integer, Producto> productos = new HashMap<>();
         List<Cliente> clientes = new ArrayList<>();
         List<Pedido> pedidos = new ArrayList<>();
-        productos.add(new Producto("Cuaderno Nova A4", 12.50));
+        productos.put(1, new Producto(1, "Cuaderno Nova A4", 12.50));
         int siguientePedido = 1;
         int opcion;
 
@@ -78,19 +80,24 @@ public class Menu {
         scanner.close();
     }
 
-    private static void registrarProducto(Scanner scanner, List<Producto> productos) {
+    private static void registrarProducto(Scanner scanner, Map<Integer, Producto> productos) {
         System.out.println("\n--- REGISTRAR PRODUCTO ---");
         String nombre = leerTexto(scanner, "Nombre: ");
         double precio = leerDouble(scanner, "Precio: ");
-        productos.add(new Producto(nombre, precio));
+        int id = productos.size() + 1;
+        productos.put(id, new Producto(id, nombre, precio));
         System.out.println("Producto registrado correctamente.");
     }
 
-    private static void consultarProductos(List<Producto> productos) {
+    private static void consultarProductos(Map<Integer, Producto> productos) {
         System.out.println("\n--- PRODUCTOS ---");
-        for (int i = 0; i < productos.size(); i++) {
-            System.out.println("Producto " + (i + 1) + ":");
-            productos.get(i).mostrarDatos();
+        if (productos.isEmpty()) {
+            System.out.println("No hay productos registrados.");
+            return;
+        }
+        for (Map.Entry<Integer, Producto> entrada : productos.entrySet()) {
+            System.out.println("Producto " + entrada.getKey() + ":");
+            entrada.getValue().mostrarDatos();
         }
     }
 
@@ -105,7 +112,7 @@ public class Menu {
         clientes.get(clientes.size() - 1).mostrarDatos();
     }
 
-    private static int registrarPedido(Scanner scanner, List<Producto> productos,
+    private static int registrarPedido(Scanner scanner, Map<Integer, Producto> productos,
             List<Cliente> clientes, List<Pedido> pedidos, int siguientePedido) {
         if (productos.isEmpty() || clientes.isEmpty()) {
             System.out.println("Debe registrar productos y clientes primero.");
@@ -115,11 +122,11 @@ public class Menu {
         consultarClientes(clientes);
         int clienteSeleccionado = leerEntero(scanner, "Numero de cliente: ") - 1;
         consultarProductos(productos);
-        int productoSeleccionado = leerEntero(scanner, "Numero de producto: ") - 1;
+        int productoSeleccionado = leerEntero(scanner, "ID de producto: ");
         int cantidad = leerEntero(scanner, "Cantidad: ");
 
         if (clienteSeleccionado < 0 || clienteSeleccionado >= clientes.size()
-                || productoSeleccionado < 0 || productoSeleccionado >= productos.size()) {
+                || !productos.containsKey(productoSeleccionado)) {
             throw new IllegalArgumentException("cliente o producto no encontrado.");
         }
 

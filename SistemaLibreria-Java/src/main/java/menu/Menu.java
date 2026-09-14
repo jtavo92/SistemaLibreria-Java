@@ -34,6 +34,9 @@ public class Menu {
             System.out.print("Seleccione una opcion: ");
 
             while (!scanner.hasNextInt()) {
+                if (!scanner.hasNextLine()) {
+                    return;
+                }
                 System.out.println("Opcion invalida. Ingrese un numero.");
                 scanner.nextLine();
                 System.out.print("Seleccione una opcion: ");
@@ -67,6 +70,8 @@ public class Menu {
                 }
             } catch (IllegalArgumentException exception) {
                 System.out.println("Error: " + exception.getMessage());
+            } catch (RuntimeException exception) {
+                System.out.println("No se pudo completar la operacion. Intente nuevamente.");
             }
         } while (opcion != 6);
 
@@ -145,6 +150,9 @@ public class Menu {
 
     private static String leerTexto(Scanner scanner, String mensaje) {
         System.out.print(mensaje);
+        if (!scanner.hasNextLine()) {
+            throw new IllegalStateException("no se recibio ningun dato.");
+        }
         String valor = scanner.nextLine().trim();
         if (valor.isEmpty()) {
             throw new IllegalArgumentException("el texto no puede estar vacio.");
@@ -162,7 +170,11 @@ public class Menu {
 
     private static double leerDouble(Scanner scanner, String mensaje) {
         try {
-            return Double.parseDouble(leerTexto(scanner, mensaje));
+            double valor = Double.parseDouble(leerTexto(scanner, mensaje));
+            if (!Double.isFinite(valor)) {
+                throw new IllegalArgumentException("debe ingresar un numero decimal finito.");
+            }
+            return valor;
         } catch (NumberFormatException exception) {
             throw new IllegalArgumentException("debe ingresar un numero decimal.");
         }

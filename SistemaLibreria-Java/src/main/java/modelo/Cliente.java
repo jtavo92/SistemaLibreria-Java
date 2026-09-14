@@ -14,11 +14,11 @@ public class Cliente {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new IllegalArgumentException("el nombre no puede estar vacio.");
         }
-        if (correo == null || correo.trim().isEmpty()) {
-            throw new IllegalArgumentException("el correo no puede estar vacio.");
+        if (correo == null || !correo.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("el correo no tiene un formato valido.");
         }
-        if (telefono == null || telefono.trim().isEmpty()) {
-            throw new IllegalArgumentException("el telefono no puede estar vacio.");
+        if (telefono == null || !telefono.trim().matches("^[0-9+()\\- ]{7,20}$")) {
+            throw new IllegalArgumentException("el telefono no tiene un formato valido.");
         }
         this.id = id;
         this.nombre = nombre.trim();

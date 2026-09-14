@@ -9,7 +9,7 @@ public class Producto {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new IllegalArgumentException("el nombre no puede estar vacio.");
         }
-        if (precio <= 0) {
+        if (!Double.isFinite(precio) || precio <= 0) {
             throw new IllegalArgumentException("el precio debe ser mayor que cero.");
         }
         this.nombre = nombre.trim();

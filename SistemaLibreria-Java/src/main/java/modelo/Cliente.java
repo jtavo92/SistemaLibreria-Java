@@ -1,51 +1,24 @@
-package modelo;
+package com.mycompany.sistemalibreria.modelo;
 
 public class Cliente {
+    private String dni;
+    private String nombre;
+    private String telefono;
 
-    private final int id;
-    private final String nombre;
-    private final String correo;
-    private final String telefono;
-
-    public Cliente(int id, String nombre, String correo, String telefono) {
-        if (id <= 0) {
-            throw new IllegalArgumentException("el ID debe ser mayor que cero.");
-        }
-        if (nombre == null || nombre.trim().isEmpty()) {
-            throw new IllegalArgumentException("el nombre no puede estar vacio.");
-        }
-        if (correo == null || !correo.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-            throw new IllegalArgumentException("el correo no tiene un formato valido.");
-        }
-        if (telefono == null || !telefono.trim().matches("^[0-9+()\\- ]{7,20}$")) {
-            throw new IllegalArgumentException("el telefono no tiene un formato valido.");
-        }
-        this.id = id;
-        this.nombre = nombre.trim();
-        this.correo = correo.trim();
-        this.telefono = telefono.trim();
+    public Cliente(String dni, String nombre, String telefono) {
+        this.dni = dni;
+        this.nombre = nombre;
+        this.telefono = telefono;
     }
 
-    public int getId() {
-        return id;
-    }
+    public Cliente() {}
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getDni() { return dni; }
+    public void setDni(String dni) { this.dni = dni; }
 
-    public String getCorreo() {
-        return correo;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void mostrarDatos() {
-        System.out.println("ID: " + id);
-        System.out.println("Nombre: " + nombre);
-        System.out.println("Correo: " + correo);
-        System.out.println("Telefono: " + telefono);
-    }
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
 }

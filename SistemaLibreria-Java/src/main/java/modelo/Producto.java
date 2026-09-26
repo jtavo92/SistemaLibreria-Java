@@ -1,4 +1,4 @@
-package com.mycompany.sistemalibreria.modelo;
+package modelo;
 
 public class Producto {
     private int id;

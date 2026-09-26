@@ -1,4 +1,4 @@
-package com.mycompany.sistemalibreria.modelo;
+package modelo;
 
 public class Cliente {
     private String dni;

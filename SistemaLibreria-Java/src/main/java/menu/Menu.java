@@ -19,7 +19,7 @@ public class Menu {
         Map<Integer, Producto> productos = new HashMap<>();
         List<Cliente> clientes = new ArrayList<>();
         List<Pedido> pedidos = new ArrayList<>();
-        productos.put(1, new Producto(1, "Cuaderno Nova A4", 12.50));
+        productos.put(1, new Producto(1, "Cuaderno Nova A4", 12.50, 50));
         int siguientePedido = 1;
         int opcion;
 
@@ -84,8 +84,9 @@ public class Menu {
         System.out.println("\n--- REGISTRAR PRODUCTO ---");
         String nombre = leerTexto(scanner, "Nombre: ");
         double precio = leerDouble(scanner, "Precio: ");
+        int stock = leerEntero(scanner, "Stock: ");
         int id = productos.size() + 1;
-        productos.put(id, new Producto(id, nombre, precio));
+        productos.put(id, new Producto(id, nombre, precio, stock));
         System.out.println("Producto registrado correctamente.");
     }
 
@@ -97,19 +98,30 @@ public class Menu {
         }
         for (Map.Entry<Integer, Producto> entrada : productos.entrySet()) {
             System.out.println("Producto " + entrada.getKey() + ":");
-            entrada.getValue().mostrarDatos();
+            mostrarProducto(entrada.getValue());
         }
+    }
+
+    private static void mostrarProducto(Producto producto) {
+        System.out.println("  Nombre: " + producto.getNombre());
+        System.out.println("  Precio: S/ " + producto.getPrecio());
+        System.out.println("  Stock: " + producto.getStock());
     }
 
     private static void registrarCliente(Scanner scanner, List<Cliente> clientes) {
         System.out.println("\n--- REGISTRAR CLIENTE ---");
-        int id = clientes.size() + 1;
+        String dni = leerTexto(scanner, "DNI: ");
         String nombre = leerTexto(scanner, "Nombre: ");
-        String correo = leerTexto(scanner, "Correo: ");
         String telefono = leerTexto(scanner, "Telefono: ");
-        clientes.add(new Cliente(id, nombre, correo, telefono));
+        clientes.add(new Cliente(dni, nombre, telefono));
         System.out.println("Cliente registrado correctamente.");
-        clientes.get(clientes.size() - 1).mostrarDatos();
+        mostrarCliente(clientes.get(clientes.size() - 1));
+    }
+
+    private static void mostrarCliente(Cliente cliente) {
+        System.out.println("  DNI: " + cliente.getDni());
+        System.out.println("  Nombre: " + cliente.getNombre());
+        System.out.println("  Telefono: " + cliente.getTelefono());
     }
 
     private static int registrarPedido(Scanner scanner, Map<Integer, Producto> productos,
@@ -140,7 +152,7 @@ public class Menu {
         System.out.println("\n--- CLIENTES ---");
         for (int i = 0; i < clientes.size(); i++) {
             System.out.println("Cliente " + (i + 1) + ":");
-            clientes.get(i).mostrarDatos();
+            mostrarCliente(clientes.get(i));
         }
     }
 

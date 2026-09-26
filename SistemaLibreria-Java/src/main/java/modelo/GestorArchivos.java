@@ -1,4 +1,4 @@
-package com.mycompany.sistemalibreria.modelo;
+package modelo;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

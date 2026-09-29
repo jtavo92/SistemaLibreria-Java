@@ -1,56 +1,34 @@
 package com.librerianova.modelo;
 
-import com.librerianova.util.Validacion;
+import com.librerianova.util.Vendible;
+import java.math.BigDecimal;
 
-public class Producto {
+public abstract class Producto implements Vendible {
 
-    private int id;
+    private final int id;
     private String nombre;
-    private double precio;
+    private BigDecimal precio;
+    private int stock;
 
-    // Constructor para productos nuevos
-    public Producto(int id, String nombre, double precio) {
-
-        if (id <= 0) {
-            throw new IllegalArgumentException(
-                    "El ID debe ser mayor que cero."
-            );
-        }
-
-        if (!Validacion.textoValido(nombre)) {
-            throw new IllegalArgumentException(
-                    "El nombre del producto no puede estar vacío."
-            );
-        }
-
-        if (!Validacion.precioValido(precio)) {
-            throw new IllegalArgumentException(
-                    "El precio debe ser mayor que cero."
-            );
-        }
+    public Producto(
+            int id,
+            String nombre,
+            double precio,
+            int stock) {
 
         this.id = id;
         this.nombre = nombre;
-        this.precio = precio;
+        this.precio = BigDecimal.valueOf(precio);
+
+        setStock(stock);
     }
 
-    // Constructor anterior para no romper otras partes del proyecto
-    public Producto(String nombre, double precio) {
+    // SOBRECARGA
+    public Producto(
+            String nombre,
+            double precio) {
 
-        if (!Validacion.textoValido(nombre)) {
-            throw new IllegalArgumentException(
-                    "El nombre del producto no puede estar vacío."
-            );
-        }
-
-        if (!Validacion.precioValido(precio)) {
-            throw new IllegalArgumentException(
-                    "El precio debe ser mayor que cero."
-            );
-        }
-
-        this.nombre = nombre;
-        this.precio = precio;
+        this(0, nombre, precio, 0);
     }
 
     public int getId() {
@@ -61,14 +39,47 @@ public class Producto {
         return nombre;
     }
 
-    public double getPrecio() {
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public BigDecimal getPrecio() {
         return precio;
     }
 
-    public void mostrarDatos() {
-
-        System.out.println("ID: " + id);
-        System.out.println("Producto: " + nombre);
-        System.out.printf("Precio: S/ %.2f%n", precio);
+    public void setPrecio(double precio) {
+        this.precio = BigDecimal.valueOf(precio);
     }
+
+    // ==============================
+    // STOCK
+    // ==============================
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+
+        if (stock < 0) {
+            throw new IllegalArgumentException(
+                    "El stock no puede ser negativo."
+            );
+        }
+
+        this.stock = stock;
+    }
+
+    public boolean tieneStock() {
+        return stock > 0;
+    }
+
+    @Override
+    public double calcularPrecioVenta() {
+
+        return precio.doubleValue();
+    }
+
+    // METODO ABSTRACTO
+    public abstract void mostrarDatos();
 }

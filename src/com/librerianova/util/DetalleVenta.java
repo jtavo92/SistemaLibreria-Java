@@ -1,38 +1,61 @@
 package com.librerianova.util;
 
+import com.librerianova.modelo.Producto;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
-/**
- * Rama: feature/calculo-total
- * Línea de venta: libro + cantidad.
- */
 public class DetalleVenta {
-    private Libro libro;
-    private int cantidad;
 
-    public DetalleVenta(Libro libro, int cantidad) {
-        if (libro == null) {
-            throw new IllegalArgumentException("El detalle debe tener un libro.");
+    private final Producto producto;
+    private final int cantidad;
+
+    public DetalleVenta(
+            Producto producto,
+            int cantidad) {
+
+        if (producto == null) {
+
+            throw new IllegalArgumentException(
+                    "El producto no puede ser nulo."
+            );
         }
+
         if (cantidad <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
+
+            throw new IllegalArgumentException(
+                    "La cantidad debe ser mayor que cero."
+            );
         }
-        if (cantidad > libro.getStock()) {
-            throw new IllegalArgumentException("Stock insuficiente. Disponible: " + libro.getStock());
-        }
-        this.libro = libro;
+
+        this.producto = producto;
         this.cantidad = cantidad;
     }
 
     public BigDecimal calcularSubtotal() {
-        return libro.getPrecio()
-                .multiply(BigDecimal.valueOf(cantidad))
-                .setScale(2, RoundingMode.HALF_UP);
+
+        return BigDecimal
+                .valueOf(producto.calcularPrecioVenta())
+                .multiply(
+                        BigDecimal.valueOf(cantidad)
+                );
+    }
+
+    public Producto getProducto() {
+        return producto;
+    }
+
+    public int getCantidad() {
+        return cantidad;
     }
 
     @Override
     public String toString() {
-        return cantidad + " x " + libro.getTitulo() + " = S/ " + calcularSubtotal();
+
+        return producto.getNombre()
+                + " x " + cantidad
+                + " = S/ "
+                + String.format(
+                        "%.2f",
+                        calcularSubtotal()
+                );
     }
 }

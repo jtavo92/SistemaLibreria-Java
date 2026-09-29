@@ -39,13 +39,13 @@ public class Producto {
 
         if (!Validacion.textoValido(nombre)) {
             throw new IllegalArgumentException(
-                    "El nombre del producto no puede estar vacío."
+                    "El nombre del producto no puede estar vacio."
             );
         }
 
         if (!Validacion.precioValido(precio)) {
             throw new IllegalArgumentException(
-                    "El precio debe ser mayor que cero."
+                    "El precio debe ser mayor que 0."
             );
         }
 

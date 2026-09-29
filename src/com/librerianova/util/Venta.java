@@ -1,5 +1,5 @@
 package com.librerianova.util;
-
+import com.librerianova.modelo.Cliente;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class Venta {
     public BigDecimal calcularIGV() {
         return calcularSubtotal().multiply(IGV)
                 .setScale(2, RoundingMode.HALF_UP);
-    }
+    }   
 
     /** Total a pagar = subtotal + IGV. */
     public BigDecimal calcularTotal() {

@@ -4,48 +4,46 @@ import com.librerianova.util.Validacion;
 
 public class Cliente {
 
-    private int id;
-    private String dni;
-    private String nombre;
-    private String correo;
-    private String telefono;
+    private final int id;
+    private final String dni;
+    private final String nombre;
+    private final String correo;
+    private final String telefono;
 
-    // Constructor completo
-    public Cliente(
-            int id,
-            String dni,
-            String nombre,
-            String correo,
-            String telefono) {
+    // SOBRECARGA DE CONSTRUCTORES
+    public Cliente(int id, String dni, String nombre, String correo, String telefono) {
+        this(id, dni, nombre, correo, telefono, true);
+    }
 
-        if (id <= 0) {
-            throw new IllegalArgumentException(
-                    "El ID debe ser mayor que cero."
-            );
-        }
+    // Segundo constructor
+    public Cliente(int id, String dni, String nombre, String correo,
+                   String telefono, boolean validar) {
 
-        if (!Validacion.dniValido(dni)) {
-            throw new IllegalArgumentException(
-                    "El DNI debe contener 8 números."
-            );
-        }
+        if (validar) {
 
-        if (!Validacion.textoValido(nombre)) {
-            throw new IllegalArgumentException(
-                    "El nombre no puede estar vacío."
-            );
-        }
+            if (!Validacion.dniValido(dni)) {
+                throw new IllegalArgumentException(
+                        "El DNI debe tener 8 digitos."
+                );
+            }
 
-        if (!Validacion.correoValido(correo)) {
-            throw new IllegalArgumentException(
-                    "El correo no tiene un formato válido."
-            );
-        }
+            if (!Validacion.textoValido(nombre)) {
+                throw new IllegalArgumentException(
+                        "El nombre no puede estar vacio."
+                );
+            }
 
-        if (!Validacion.telefonoValido(telefono)) {
-            throw new IllegalArgumentException(
-                    "El teléfono debe contener entre 7 y 15 números."
-            );
+            if (!Validacion.correoValido(correo)) {
+                throw new IllegalArgumentException(
+                        "El correo no es valido."
+                );
+            }
+
+            if (!Validacion.telefonoValido(telefono)) {
+                throw new IllegalArgumentException(
+                        "El telefono no es valido."
+                );
+            }
         }
 
         this.id = id;
@@ -53,31 +51,6 @@ public class Cliente {
         this.nombre = nombre;
         this.correo = correo;
         this.telefono = telefono;
-    }
-
-    // Constructor para nuevos clientes.
-    // El ID se coloca automáticamente desde Menu.
-    public Cliente(
-            int id,
-            String dni,
-            String nombre,
-            String correo,
-            String telefono,
-            boolean nuevo) {
-
-        this(id, dni, nombre, correo, telefono);
-    }
-
-    // Cliente de ejemplo que ya está registrado
-    public static Cliente clienteRegistrado() {
-
-        return new Cliente(
-                1,
-                "72886138",
-                "JOSÉ GUSTAVO ZAPATA DE LA CRUZ",
-                "jose.zapata@gmail.com",
-                "999999999"
-        );
     }
 
     public int getId() {
@@ -102,10 +75,24 @@ public class Cliente {
 
     public void mostrarDatos() {
 
-        System.out.println("ID: " + id);
-        System.out.println("DNI: " + dni);
-        System.out.println("Nombre: " + nombre);
-        System.out.println("Correo: " + correo);
-        System.out.println("Teléfono: " + telefono);
+        System.out.println(
+                "ID: " + id
+                + " | DNI: " + dni
+                + " | Nombre: " + nombre
+                + " | Correo: " + correo
+                + " | Telefono: " + telefono
+        );
+    }
+
+    @Override
+    public String toString() {
+
+        return "Cliente{"
+                + "id=" + id
+                + ", dni='" + dni + '\''
+                + ", nombre='" + nombre + '\''
+                + ", correo='" + correo + '\''
+                + ", telefono='" + telefono + '\''
+                + '}';
     }
 }

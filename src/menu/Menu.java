@@ -1,20 +1,47 @@
 package menu;
 
 import com.librerianova.modelo.Cliente;
+import com.librerianova.modelo.GestorClientes;
+import com.librerianova.modelo.GestorProductos;
 import com.librerianova.modelo.Producto;
+import com.librerianova.modelo.ProductoPapeleria;
+
+import com.librerianova.util.DetalleVenta;
+import com.librerianova.util.GestorArchivos;
+import com.librerianova.util.Libro;
+import com.librerianova.util.Validacion;
+import com.librerianova.util.Venta;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
 
-    private static final Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner =
+            new Scanner(System.in);
 
-    private static final List<Cliente> clientes = new ArrayList<>();
-    private static final List<Producto> productos = new ArrayList<>();
+    private static final GestorClientes gestorClientes =
+            new GestorClientes();
 
-    private static int siguienteIdCliente = 2;
-    private static int siguienteIdProducto = 6;
+    private static final GestorProductos gestorProductos =
+            new GestorProductos();
+
+    private static final List<Venta> ventas =
+            new ArrayList<>();
+
+    private static int siguienteIdCliente = 1;
+    private static int siguienteIdProducto = 1;
+    private static int siguienteIdVenta = 1;
+
+    private static boolean datosCargados = false;
+
+    // ========================================
+    // MENU PRINCIPAL
+    // ========================================
 
     public static void mostrarMenu() {
 
@@ -26,935 +53,1721 @@ public class Menu {
 
             mostrarEncabezado();
 
-            System.out.println("  +--------------------------------------+");
-            System.out.println("  |              MENU PRINCIPAL          |");
-            System.out.println("  +--------------------------------------+");
-            System.out.println("  |  1.  Catalogo de productos           |");
-            System.out.println("  |  2.  Buscar producto                 |");
-            System.out.println("  |  3.  Registrar cliente               |");
-            System.out.println("  |  4.  Consultar clientes              |");
-            System.out.println("  |  5.  Registrar producto              |");
-            System.out.println("  |  6.  Registrar pedido                |");
-            System.out.println("  |  7.  Informacion de la libreria     |");
-            System.out.println("  |  8.  Ayuda                           |");
-            System.out.println("  |  9.  Salir                           |");
-            System.out.println("  +--------------------------------------+");
-            System.out.print("     Seleccione una opcion: ");
+            System.out.println("1. PRODUCTOS");
+            System.out.println("2. CLIENTES");
+            System.out.println("3. PEDIDOS");
+            System.out.println("4. REPORTES");
+            System.out.println("5. INFORMACION");
+            System.out.println("6. AYUDA");
+            System.out.println("7. SALIR");
 
-            opcion = leerEntero();
+            System.out.println(
+                    "----------------------------------------"
+            );
 
-            System.out.println();
+            opcion = leerEntero(
+                    "Seleccione una opcion: "
+            );
 
             switch (opcion) {
 
-                case 1:
-                    mostrarProductos();
-                    break;
+                case 1 -> menuProductos();
 
-                case 2:
-                    buscarProducto();
-                    break;
+                case 2 -> menuClientes();
 
-                case 3:
-                    registrarCliente();
-                    break;
+                case 3 -> menuPedidos();
 
-                case 4:
-                    mostrarClientes();
-                    break;
+                case 4 -> menuReportes();
 
-                case 5:
-                    registrarProducto();
-                    break;
+                case 5 -> mostrarInformacion();
 
-                case 6:
-                    registrarPedido();
-                    break;
+                case 6 -> mostrarAyuda();
 
-                case 7:
-                    mostrarInformacion();
-                    break;
+                case 7 -> despedida();
 
-                case 8:
-                    mostrarAyuda();
-                    break;
-
-                case 9:
-                    despedida();
-                    break;
-
-                default:
-                    System.out.println(
-                            "  [!] Opcion invalida. Seleccione entre 1 y 9."
-                    );
+                default ->
+                        System.out.println(
+                                "Opcion no valida."
+                        );
             }
 
-            if (opcion != 9) {
-
-                System.out.println();
-                System.out.println("  --------------------------------------");
-                System.out.println("       Presione ENTER para continuar...");
-                System.out.println("  --------------------------------------");
-
-                scanner.nextLine();
-            }
-
-        } while (opcion != 9);
+        } while (opcion != 7);
     }
 
-    // ==================================================
+    // ========================================
     // ENCABEZADO
-    // ==================================================
+    // ========================================
 
     private static void mostrarEncabezado() {
 
         System.out.println();
-        System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |                                                |");
-        System.out.println("  |              L I B R E R I A   N O V A       |");
-        System.out.println("  |                                                |");
-        System.out.println("  |          Sistema de gestion de libreria       |");
-        System.out.println("  |                                                |");
-        System.out.println("  ==================================================");
-        System.out.println();
+
+        System.out.println(
+                "========================================"
+        );
+
+        System.out.println(
+                "          SISTEMA DE LIBRERIA"
+        );
+
+        System.out.println(
+                "========================================"
+        );
     }
 
-    // ==================================================
+    // ========================================
     // DATOS INICIALES
-    // ==================================================
+    // ========================================
 
     private static void cargarDatosIniciales() {
 
-        if (!productos.isEmpty()) {
+        if (datosCargados) {
             return;
         }
 
-        // PRODUCTOS DE EJEMPLO
+        datosCargados = true;
 
-        productos.add(
-                new Producto(
-                        1,
-                        "Cuaderno Universitario",
-                        12.50
+        // ====================================
+        // LIBRO 1
+        // ====================================
+
+        gestorProductos.agregarProducto(
+                new Libro(
+                        siguienteIdProducto++,
+                        "Java desde cero",
+                        "Autor Demo",
+                        new BigDecimal("45.90"),
+                        10
                 )
         );
 
-        productos.add(
-                new Producto(
-                        2,
-                        "Lapicero Azul",
-                        2.50
+        // ====================================
+        // LIBRO 2
+        // ====================================
+
+        gestorProductos.agregarProducto(
+                new Libro(
+                        siguienteIdProducto++,
+                        "Programacion POO",
+                        "Autor Demo",
+                        new BigDecimal("55.00"),
+                        8
                 )
         );
 
-        productos.add(
-                new Producto(
-                        3,
-                        "Agenda 2026",
-                        25.00
+        // ====================================
+        // PRODUCTO DE PAPELERIA
+        // ====================================
+
+        gestorProductos.agregarProducto(
+                new ProductoPapeleria(
+                        siguienteIdProducto++,
+                        "Cuaderno A4",
+                        12.50,
+                        "Cuadernos",
+                        5
                 )
         );
 
-        productos.add(
-                new Producto(
-                        4,
-                        "Folder A4",
-                        4.50
-                )
+        // ====================================
+        // CLIENTE DEMO
+        // ====================================
+
+        Cliente clienteDemo = new Cliente(
+                siguienteIdCliente++,
+                "70000000",
+                "Cliente Demo",
+                "demo@correo.com",
+                "999999999"
         );
 
-        productos.add(
-                new Producto(
-                        5,
-                        "Libro de Programacion Java",
-                        65.00
-                )
-        );
-
-        // CLIENTE DE EJEMPLO
-
-        clientes.add(
-                Cliente.clienteRegistrado()
+        gestorClientes.agregarCliente(
+                clienteDemo
         );
     }
 
-    // ==================================================
-    // 1. MOSTRAR PRODUCTOS
-    // ==================================================
+    // ========================================
+    // PRODUCTOS
+    // ========================================
+
+    private static void menuProductos() {
+
+        int opcion;
+
+        do {
+
+            System.out.println();
+
+            System.out.println(
+                    "========== PRODUCTOS =========="
+            );
+
+            System.out.println(
+                    "1. Registrar producto"
+            );
+
+            System.out.println(
+                    "2. Listar productos"
+            );
+
+            System.out.println(
+                    "3. Buscar producto"
+            );
+
+            System.out.println(
+                    "4. Actualizar producto"
+            );
+
+            System.out.println(
+                    "5. Eliminar producto"
+            );
+
+            System.out.println(
+                    "6. Volver"
+            );
+
+            opcion = leerEntero(
+                    "Seleccione una opcion: "
+            );
+
+            switch (opcion) {
+
+                case 1 -> registrarProducto();
+
+                case 2 -> mostrarProductos();
+
+                case 3 -> buscarProducto();
+
+                case 4 -> actualizarProducto();
+
+                case 5 -> eliminarProducto();
+
+                case 6 -> {
+                }
+
+                default ->
+                        System.out.println(
+                                "Opcion no valida."
+                        );
+            }
+
+        } while (opcion != 6);
+    }
+
+    // ========================================
+    // LISTAR PRODUCTOS
+    // ========================================
 
     private static void mostrarProductos() {
 
         System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |              CATALOGO DE PRODUCTOS            |");
-        System.out.println("  ==================================================");
-
-        if (productos.isEmpty()) {
-
-            System.out.println();
-            System.out.println("  No existen productos registrados.");
-
-            return;
-        }
-
-        System.out.println();
-
-        System.out.printf(
-                "  %-5s %-32s %12s%n",
-                "ID",
-                "PRODUCTO",
-                "PRECIO"
-        );
 
         System.out.println(
-                "  --------------------------------------------------"
+                "========== LISTA DE PRODUCTOS =========="
         );
 
-        for (Producto producto : productos) {
-
-            System.out.printf(
-                    "  %-5d %-32s S/ %8.2f%n",
-                    producto.getId(),
-                    producto.getNombre(),
-                    producto.getPrecio()
-            );
-        }
+        gestorProductos.listarProductos();
 
         System.out.println(
-                "  --------------------------------------------------"
-        );
-
-        System.out.println(
-                "  Total de productos: " + productos.size()
+                "Cantidad de productos: "
+                + gestorProductos.cantidadProductos()
         );
     }
 
-    // ==================================================
-    // 2. BUSCAR PRODUCTO
-    // ==================================================
+    // ========================================
+    // BUSCAR PRODUCTO
+    // ========================================
 
     private static void buscarProducto() {
 
-        System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |                BUSCAR PRODUCTO                |");
-        System.out.println("  ==================================================");
+        int id = leerEntero(
+                "Ingrese el ID del producto: "
+        );
 
-        System.out.println();
-        System.out.print("  Ingrese el nombre del producto: ");
+        Producto producto =
+                gestorProductos.buscarPorId(id);
 
-        String busqueda = scanner.nextLine().trim();
-
-        if (busqueda.isEmpty()) {
-
-            System.out.println();
-            System.out.println("  [!] Debe ingresar un nombre.");
-
-            return;
-        }
-
-        boolean encontrado = false;
-
-        for (Producto producto : productos) {
-
-            if (producto.getNombre()
-                    .toLowerCase()
-                    .contains(busqueda.toLowerCase())) {
-
-                System.out.println();
-                System.out.println("  [OK] Producto encontrado");
-
-                System.out.println(
-                        "  --------------------------------------"
-                );
-
-                System.out.println(
-                        "  ID      : " + producto.getId()
-                );
-
-                System.out.println(
-                        "  Nombre  : " + producto.getNombre()
-                );
-
-                System.out.printf(
-                        "  Precio  : S/ %.2f%n",
-                        producto.getPrecio()
-                );
-
-                encontrado = true;
-            }
-        }
-
-        if (!encontrado) {
-
-            System.out.println();
-            System.out.println(
-                    "  [!] No se encontro ningun producto."
-            );
-        }
-    }
-
-    // ==================================================
-    // 3. REGISTRAR CLIENTE
-    // ==================================================
-
-    private static void registrarCliente() {
-
-        System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |                REGISTRAR CLIENTE              |");
-        System.out.println("  ==================================================");
-
-        try {
-
-            System.out.println();
-            System.out.println(
-                    "  El ID sera generado automaticamente."
-            );
-
-            System.out.println();
-
-            System.out.print("  DNI              : ");
-            String dni = scanner.nextLine().trim();
-
-            System.out.print("  Nombre completo   : ");
-            String nombre = scanner.nextLine().trim();
-
-            System.out.print("  Correo            : ");
-            String correo = scanner.nextLine().trim();
-
-            System.out.print("  Telefono          : ");
-            String telefono = scanner.nextLine().trim();
-
-            int nuevoId = siguienteIdCliente;
-
-            Cliente nuevoCliente = new Cliente(
-                    nuevoId,
-                    dni,
-                    nombre,
-                    correo,
-                    telefono
-            );
-
-            clientes.add(nuevoCliente);
-
-            siguienteIdCliente++;
-
-            System.out.println();
-            System.out.println(
-                    "  +--------------------------------------+"
-            );
-            System.out.println(
-                    "  |     CLIENTE REGISTRADO CORRECTAMENTE |"
-            );
-            System.out.println(
-                    "  +--------------------------------------+"
-            );
-
-            System.out.println();
-            System.out.println(
-                    "  ID        : " + nuevoCliente.getId()
-            );
+        if (producto == null) {
 
             System.out.println(
-                    "  DNI       : " + nuevoCliente.getDni()
-            );
-
-            System.out.println(
-                    "  Nombre    : " + nuevoCliente.getNombre()
-            );
-
-            System.out.println(
-                    "  Correo    : " + nuevoCliente.getCorreo()
-            );
-
-            System.out.println(
-                    "  Telefono  : " + nuevoCliente.getTelefono()
-            );
-
-        } catch (IllegalArgumentException e) {
-
-            System.out.println();
-            System.out.println(
-                    "  [ERROR] No se pudo registrar el cliente."
-            );
-
-            System.out.println(
-                    "  Motivo: " + e.getMessage()
-            );
-        }
-    }
-
-    // ==================================================
-    // 4. MOSTRAR CLIENTES
-    // ==================================================
-
-    private static void mostrarClientes() {
-
-        System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |               CLIENTES REGISTRADOS            |");
-        System.out.println("  ==================================================");
-
-        if (clientes.isEmpty()) {
-
-            System.out.println();
-            System.out.println(
-                    "  No existen clientes registrados."
+                    "No se encontro el producto."
             );
 
             return;
         }
 
-        System.out.println();
-        System.out.println(
-                "  Solo se muestra la informacion necesaria."
-        );
-        System.out.println(
-                "  Los datos de contacto se mantienen ocultos."
-        );
-        System.out.println();
-
-        for (Cliente cliente : clientes) {
-
-            System.out.println(
-                    "  +------------------------------------------+"
-            );
-
-            System.out.println(
-                    "  | ID       : " + cliente.getId()
-            );
-
-            System.out.println(
-                    "  | DNI      : " + ocultarDni(cliente.getDni())
-            );
-
-            System.out.println(
-                    "  | Nombre   : " + cliente.getNombre()
-            );
-
-            System.out.println(
-                    "  | Correo   : [DATO PROTEGIDO]"
-            );
-
-            System.out.println(
-                    "  | Telefono : [DATO PROTEGIDO]"
-            );
-
-            System.out.println(
-                    "  +------------------------------------------+"
-            );
-        }
-
-        System.out.println();
-        System.out.println(
-                "  Total de clientes: " + clientes.size()
-        );
+        producto.mostrarDatos();
     }
 
-    // ==================================================
-    // PROTEGER DNI
-    // ==================================================
-
-    private static String ocultarDni(String dni) {
-
-        if (dni == null || dni.length() != 8) {
-            return "[DATO PROTEGIDO]";
-        }
-
-        return "****" + dni.substring(4);
-    }
-
-    // ==================================================
-    // 5. REGISTRAR PRODUCTO
-    // ==================================================
+    // ========================================
+    // REGISTRAR PRODUCTO
+    // ========================================
 
     private static void registrarProducto() {
 
         System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |               REGISTRAR PRODUCTO              |");
-        System.out.println("  ==================================================");
 
-        try {
+        System.out.println(
+                "========== REGISTRAR PRODUCTO =========="
+        );
 
-            System.out.println();
+        System.out.println(
+                "1. Libro"
+        );
+
+        System.out.println(
+                "2. Producto de papeleria"
+        );
+
+        int tipo = leerEntero(
+                "Seleccione el tipo: "
+        );
+
+        if (tipo != 1 && tipo != 2) {
+
             System.out.println(
-                    "  El ID sera generado automaticamente."
+                    "Tipo no valido."
             );
 
-            System.out.println();
+            return;
+        }
 
-            System.out.print("  Nombre del producto : ");
+        String nombre = leerTexto(
+                "Ingrese el nombre: "
+        );
 
-            String nombre = scanner.nextLine().trim();
+        double precio = leerPrecio(
+                "Ingrese el precio: "
+        );
 
-            System.out.print("  Precio              : S/ ");
+        // ====================================
+        // LIBRO
+        // ====================================
 
-            double precio = leerDouble();
+        if (tipo == 1) {
 
-            int nuevoId = siguienteIdProducto;
+            String autor = leerTexto(
+                    "Ingrese el autor: "
+            );
 
-            Producto nuevoProducto = new Producto(
-                    nuevoId,
+            int stock = leerEnteroNoNegativo(
+                    "Ingrese el stock: "
+            );
+
+            Libro libro = new Libro(
+                    siguienteIdProducto++,
+                    nombre,
+                    autor,
+                    BigDecimal.valueOf(precio),
+                    stock
+            );
+
+            gestorProductos.agregarProducto(
+                    libro
+            );
+
+            GestorArchivos.guardarProducto(
                     nombre,
                     precio
             );
 
-            productos.add(nuevoProducto);
-
-            siguienteIdProducto++;
-
-            System.out.println();
             System.out.println(
-                    "  +--------------------------------------+"
-            );
-            System.out.println(
-                    "  |     PRODUCTO REGISTRADO CORRECTAMENTE|"
-            );
-            System.out.println(
-                    "  +--------------------------------------+"
+                    "Libro registrado correctamente."
             );
 
-            System.out.println();
+        } else {
 
-            System.out.println(
-                    "  ID       : " + nuevoProducto.getId()
+            // =================================
+            // PAPELERIA
+            // =================================
+
+            String categoria = leerTexto(
+                    "Ingrese la categoria: "
+            );
+
+            int stock = leerEnteroNoNegativo(
+                    "Ingrese el stock: "
+            );
+
+            ProductoPapeleria producto =
+                    new ProductoPapeleria(
+                            siguienteIdProducto++,
+                            nombre,
+                            precio,
+                            categoria,
+                            stock
+                    );
+
+            gestorProductos.agregarProducto(
+                    producto
+            );
+
+            GestorArchivos.guardarProducto(
+                    nombre,
+                    precio
             );
 
             System.out.println(
-                    "  Producto : " + nuevoProducto.getNombre()
-            );
-
-            System.out.printf(
-                    "  Precio   : S/ %.2f%n",
-                    nuevoProducto.getPrecio()
-            );
-
-        } catch (IllegalArgumentException e) {
-
-            System.out.println();
-            System.out.println(
-                    "  [ERROR] No se pudo registrar el producto."
-            );
-
-            System.out.println(
-                    "  Motivo: " + e.getMessage()
+                    "Producto de papeleria registrado correctamente."
             );
         }
     }
 
-    // ==================================================
-    // 6. REGISTRAR PEDIDO
-    // ==================================================
+    // ========================================
+    // ACTUALIZAR PRODUCTO
+    // ========================================
+
+    private static void actualizarProducto() {
+
+        int id = leerEntero(
+                "Ingrese el ID del producto: "
+        );
+
+        Producto producto =
+                gestorProductos.buscarPorId(id);
+
+        if (producto == null) {
+
+            System.out.println(
+                    "No se encontro el producto."
+            );
+
+            return;
+        }
+
+        System.out.println();
+
+        System.out.println(
+                "Producto actual:"
+        );
+
+        producto.mostrarDatos();
+
+        System.out.println();
+
+        String nuevoNombre = leerTexto(
+                "Ingrese el nuevo nombre: "
+        );
+
+        double nuevoPrecio = leerPrecio(
+                "Ingrese el nuevo precio: "
+        );
+
+        int nuevoStock = leerEnteroNoNegativo(
+                "Ingrese el nuevo stock: "
+        );
+
+        producto.setNombre(
+                nuevoNombre
+        );
+
+        producto.setPrecio(
+                nuevoPrecio
+        );
+
+        producto.setStock(
+                nuevoStock
+        );
+
+        // ====================================
+        // DATOS DEL LIBRO
+        // ====================================
+
+        if (producto instanceof Libro libro) {
+
+            String nuevoAutor = leerTexto(
+                    "Ingrese el nuevo autor: "
+            );
+
+            libro.setAutor(
+                    nuevoAutor
+            );
+        }
+
+        // ====================================
+        // DATOS DE PAPELERIA
+        // ====================================
+
+        if (producto instanceof ProductoPapeleria papeleria) {
+
+            String nuevaCategoria = leerTexto(
+                    "Ingrese la nueva categoria: "
+            );
+
+            papeleria.setCategoria(
+                    nuevaCategoria
+            );
+        }
+
+        System.out.println(
+                "Producto actualizado correctamente."
+        );
+    }
+
+    // ========================================
+    // ELIMINAR PRODUCTO
+    // ========================================
+
+    private static void eliminarProducto() {
+
+        int id = leerEntero(
+                "Ingrese el ID del producto: "
+        );
+
+        boolean eliminado =
+                gestorProductos.eliminarPorId(id);
+
+        if (eliminado) {
+
+            System.out.println(
+                    "Producto eliminado correctamente."
+            );
+
+        } else {
+
+            System.out.println(
+                    "No se encontro el producto."
+            );
+        }
+    }
+
+    // ========================================
+    // CLIENTES
+    // ========================================
+
+    private static void menuClientes() {
+
+        int opcion;
+
+        do {
+
+            System.out.println();
+
+            System.out.println(
+                    "========== CLIENTES =========="
+            );
+
+            System.out.println(
+                    "1. Registrar cliente"
+            );
+
+            System.out.println(
+                    "2. Listar clientes"
+            );
+
+            System.out.println(
+                    "3. Buscar cliente"
+            );
+
+            System.out.println(
+                    "4. Eliminar cliente"
+            );
+
+            System.out.println(
+                    "5. Volver"
+            );
+
+            opcion = leerEntero(
+                    "Seleccione una opcion: "
+            );
+
+            switch (opcion) {
+
+                case 1 -> registrarCliente();
+
+                case 2 -> listarClientes();
+
+                case 3 -> buscarCliente();
+
+                case 4 -> eliminarCliente();
+
+                case 5 -> {
+                }
+
+                default ->
+                        System.out.println(
+                                "Opcion no valida."
+                        );
+            }
+
+        } while (opcion != 5);
+    }
+
+    // ========================================
+    // REGISTRAR CLIENTE
+    // ========================================
+
+    private static void registrarCliente() {
+
+        System.out.println();
+
+        System.out.println(
+                "========== REGISTRAR CLIENTE =========="
+        );
+
+        /*
+         * IMPORTANTE:
+         * Aqui NO se pregunta por DNI.
+         *
+         * El DNI solamente se pregunta
+         * cuando se registra un pedido.
+         */
+
+        String nombre = leerTexto(
+                "Ingrese nombre: "
+        );
+
+        String correo;
+
+        while (true) {
+
+            correo = leerTexto(
+                    "Ingrese correo: "
+            );
+
+            if (Validacion.correoValido(correo)) {
+                break;
+            }
+
+            System.out.println(
+                    "Error: el correo no es valido."
+            );
+        }
+
+        String telefono;
+
+        while (true) {
+
+            telefono = leerTexto(
+                    "Ingrese telefono: "
+            );
+
+            if (Validacion.telefonoValido(telefono)) {
+                break;
+            }
+
+            System.out.println(
+                    "Error: el telefono debe tener 9 digitos."
+            );
+        }
+
+        /*
+         * Tu clase Cliente actualmente exige
+         * un DNI valido de 8 digitos.
+         *
+         * Como el DNI no se pregunta durante
+         * el registro del cliente, se utiliza
+         * un valor interno temporal.
+         */
+
+        String dni = "00000000";
+
+        Cliente cliente = new Cliente(
+                siguienteIdCliente++,
+                dni,
+                nombre,
+                correo,
+                telefono
+        );
+
+        gestorClientes.agregarCliente(
+                cliente
+        );
+
+        System.out.println(
+                "Cliente registrado correctamente."
+        );
+    }
+
+    // ========================================
+    // LISTAR CLIENTES
+    // ========================================
+
+    private static void listarClientes() {
+
+        System.out.println();
+
+        System.out.println(
+                "========== LISTA DE CLIENTES =========="
+        );
+
+        gestorClientes.listarClientes();
+
+        System.out.println(
+                "Cantidad de clientes: "
+                + gestorClientes.cantidadClientes()
+        );
+    }
+
+    // ========================================
+    // BUSCAR CLIENTE
+    // ========================================
+
+    private static void buscarCliente() {
+
+        String dni = leerTexto(
+                "Ingrese DNI del cliente: "
+        );
+
+        Cliente cliente =
+                gestorClientes.buscarPorDni(dni);
+
+        if (cliente == null) {
+
+            System.out.println(
+                    "No se encontro el cliente."
+            );
+
+            return;
+        }
+
+        cliente.mostrarDatos();
+    }
+
+    // ========================================
+    // ELIMINAR CLIENTE
+    // ========================================
+
+    private static void eliminarCliente() {
+
+        String dni = leerTexto(
+                "Ingrese DNI del cliente: "
+        );
+
+        boolean eliminado =
+                gestorClientes.eliminarPorDni(dni);
+
+        if (eliminado) {
+
+            System.out.println(
+                    "Cliente eliminado correctamente."
+            );
+
+        } else {
+
+            System.out.println(
+                    "No se encontro el cliente."
+            );
+        }
+    }
+
+    // ========================================
+    // PEDIDOS
+    // ========================================
+
+    private static void menuPedidos() {
+
+        int opcion;
+
+        do {
+
+            System.out.println();
+
+            System.out.println(
+                    "========== PEDIDOS =========="
+            );
+
+            System.out.println(
+                    "1. Registrar pedido"
+            );
+
+            System.out.println(
+                    "2. Listar pedidos"
+            );
+
+            System.out.println(
+                    "3. Buscar pedido"
+            );
+
+            System.out.println(
+                    "4. Volver"
+            );
+
+            opcion = leerEntero(
+                    "Seleccione una opcion: "
+            );
+
+            switch (opcion) {
+
+                case 1 -> registrarPedido();
+
+                case 2 -> listarPedidos();
+
+                case 3 -> buscarPedido();
+
+                case 4 -> {
+                }
+
+                default ->
+                        System.out.println(
+                                "Opcion no valida."
+                        );
+            }
+
+        } while (opcion != 4);
+    }
+
+    // ========================================
+    // REGISTRAR PEDIDO
+    // ========================================
 
     private static void registrarPedido() {
 
-        System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |                 REGISTRAR PEDIDO              |");
-        System.out.println("  ==================================================");
+        if (gestorProductos.cantidadProductos() == 0) {
 
-        if (clientes.isEmpty()) {
-
-            System.out.println();
             System.out.println(
-                    "  [!] No existen clientes registrados."
+                    "No existen productos registrados."
             );
 
             return;
         }
 
-        if (productos.isEmpty()) {
+        System.out.println();
 
-            System.out.println();
+        System.out.println(
+                "========== REGISTRAR PEDIDO =========="
+        );
+
+        // ====================================
+        // DNI
+        // ====================================
+
+        String tieneDni = leerTexto(
+                "¿El cliente tiene DNI? (S/N): "
+        );
+
+        while (!tieneDni.equalsIgnoreCase("S")
+                && !tieneDni.equalsIgnoreCase("N")) {
+
             System.out.println(
-                    "  [!] No existen productos registrados."
+                    "Error: responda S o N."
             );
 
-            return;
+            tieneDni = leerTexto(
+                    "¿El cliente tiene DNI? (S/N): "
+            );
         }
 
-        Cliente cliente = clientes.get(0);
+        Cliente cliente;
 
-        System.out.println();
-        System.out.println("  CLIENTE");
-        System.out.println(
-                "  ------------------------------------------"
-        );
+        // ====================================
+        // SI TIENE DNI
+        // ====================================
 
-        System.out.println(
-                "  ID       : " + cliente.getId()
-        );
+        if (tieneDni.equalsIgnoreCase("S")) {
 
-        System.out.println(
-                "  DNI      : " + ocultarDni(cliente.getDni())
-        );
+            String dni;
 
-        System.out.println(
-                "  Nombre   : " + cliente.getNombre()
-        );
+            while (true) {
 
-        System.out.println();
+                dni = leerTexto(
+                        "Ingrese DNI del cliente: "
+                );
 
-        mostrarProductos();
+                if (!Validacion.dniValido(dni)) {
 
-        System.out.println();
+                    System.out.println(
+                            "Error: el DNI debe tener 8 digitos."
+                    );
 
-        System.out.print(
-                "  Ingrese ID del producto: "
-        );
+                    continue;
+                }
 
-        int idProducto = leerEntero();
+                cliente =
+                        gestorClientes.buscarPorDni(dni);
 
-        Producto productoSeleccionado = null;
+                if (cliente == null) {
 
-        for (Producto producto : productos) {
+                    System.out.println(
+                            "No se encontro un cliente con ese DNI."
+                    );
 
-            if (producto.getId() == idProducto) {
+                    continue;
+                }
 
-                productoSeleccionado = producto;
+                break;
+            }
+
+        } else {
+
+            // =================================
+            // SI NO TIENE DNI
+            // =================================
+            //
+            // NO SE PREGUNTA NADA MAS.
+            //
+            // Se crea un cliente temporal
+            // para poder generar el pedido.
+            // =================================
+
+            cliente = new Cliente(
+                    0,
+                    "00000000",
+                    "Cliente sin DNI",
+                    "sin-dni@librerianova.com",
+                    "999999999"
+            );
+        }
+
+        // ====================================
+        // CREAR VENTA
+        // ====================================
+
+        Venta venta =
+                new Venta(
+                        siguienteIdVenta,
+                        cliente
+                );
+
+        // ====================================
+        // AGREGAR PRODUCTOS
+        // ====================================
+
+        while (true) {
+
+            mostrarProductos();
+
+            int idProducto = leerEntero(
+                    "Ingrese ID del producto, o 0 para terminar: "
+            );
+
+            if (idProducto == 0) {
+                break;
+            }
+
+            Producto producto =
+                    gestorProductos.buscarPorId(
+                            idProducto
+                    );
+
+            if (producto == null) {
+
+                System.out.println(
+                        "No se encontro el producto."
+                );
+
+                continue;
+            }
+
+            // =================================
+            // VERIFICAR STOCK
+            // =================================
+
+            int stockDisponible =
+                    producto.getStock();
+
+            if (stockDisponible <= 0) {
+
+                System.out.println(
+                        "El producto no tiene stock disponible."
+                );
+
+                continue;
+            }
+
+            int cantidad =
+                    leerEnteroPositivo(
+                            "Ingrese cantidad: "
+                    );
+
+            // =================================
+            // CANTIDAD YA AGREGADA
+            // =================================
+
+            int cantidadEnVenta =
+                    obtenerCantidadEnVenta(
+                            venta,
+                            producto
+                    );
+
+            int stockDisponibleReal =
+                    stockDisponible
+                    - cantidadEnVenta;
+
+            if (cantidad > stockDisponibleReal) {
+
+                System.out.println(
+                        "No hay stock suficiente."
+                );
+
+                System.out.println(
+                        "Stock disponible: "
+                        + stockDisponibleReal
+                );
+
+                continue;
+            }
+
+            // =================================
+            // AGREGAR DETALLE
+            // =================================
+
+            try {
+
+                DetalleVenta detalle =
+                        new DetalleVenta(
+                                producto,
+                                cantidad
+                        );
+
+                venta.agregarDetalle(
+                        detalle
+                );
+
+                System.out.println(
+                        "Producto agregado al pedido."
+                );
+
+            } catch (IllegalArgumentException e) {
+
+                System.out.println(
+                        "Error: "
+                        + e.getMessage()
+                );
+
+                continue;
+            }
+
+            String continuar = leerTexto(
+                    "Desea agregar otro producto? (S/N): "
+            );
+
+            while (!continuar.equalsIgnoreCase("S")
+                    && !continuar.equalsIgnoreCase("N")) {
+
+                System.out.println(
+                        "Error: responda S o N."
+                );
+
+                continuar = leerTexto(
+                        "Desea agregar otro producto? (S/N): "
+                );
+            }
+
+            if (!continuar.equalsIgnoreCase("S")) {
                 break;
             }
         }
 
-        if (productoSeleccionado == null) {
+        // ====================================
+        // SIN PRODUCTOS
+        // ====================================
 
-            System.out.println();
+        if (venta.getDetalles().isEmpty()) {
+
             System.out.println(
-                    "  [!] No existe un producto con ese ID."
+                    "El pedido no tiene productos."
+            );
+
+            System.out.println(
+                    "El pedido no sera registrado."
             );
 
             return;
         }
 
-        System.out.print(
-                "  Ingrese cantidad: "
+        // ====================================
+        // RESUMEN
+        // ====================================
+
+        System.out.println();
+
+        System.out.println(
+                "========================================"
         );
 
-        int cantidad = leerEntero();
+        System.out.println(
+                "          RESUMEN DEL PEDIDO"
+        );
 
-        if (cantidad <= 0) {
+        System.out.println(
+                "========================================"
+        );
+
+        venta.mostrarResumen();
+
+        System.out.println();
+
+        System.out.println(
+                "IMPORTANTE: el stock aun NO ha sido descontado."
+        );
+
+        // ====================================
+        // CONFIRMAR
+        // ====================================
+
+        String confirmar = leerTexto(
+                "Confirma la venta? (S/N): "
+        );
+
+        while (!confirmar.equalsIgnoreCase("S")
+                && !confirmar.equalsIgnoreCase("N")) {
+
+            System.out.println(
+                    "Error: responda S o N."
+            );
+
+            confirmar = leerTexto(
+                    "Confirma la venta? (S/N): "
+            );
+        }
+
+        // ====================================
+        // CANCELAR
+        // ====================================
+
+        if (!confirmar.equalsIgnoreCase("S")) {
 
             System.out.println();
+
             System.out.println(
-                    "  [!] La cantidad debe ser mayor que cero."
+                    "Venta cancelada."
+            );
+
+            System.out.println(
+                    "El stock no ha sido modificado."
             );
 
             return;
         }
 
-        double subtotal =
-                productoSeleccionado.getPrecio()
-                * cantidad;
+        // ====================================
+        // VALIDAR STOCK FINAL
+        // ====================================
 
-        double igv =
-                subtotal * 0.18;
+        if (!validarStockVenta(venta)) {
 
-        double total =
-                subtotal + igv;
+            System.out.println();
 
-        System.out.println();
+            System.out.println(
+                    "La venta no puede confirmarse."
+            );
 
-        System.out.println(
-                "  =================================================="
-        );
+            System.out.println(
+                    "El stock no ha sido modificado."
+            );
 
-        System.out.println(
-                "  |              RESUMEN DEL PEDIDO              |"
-        );
+            return;
+        }
 
-        System.out.println(
-                "  =================================================="
-        );
+        // ====================================
+        // DESCONTAR STOCK
+        // ====================================
 
-        System.out.println();
+        actualizarStock(venta);
 
-        System.out.println(
-                "  Cliente       : " + cliente.getNombre()
-        );
+        // ====================================
+        // REGISTRAR VENTA
+        // ====================================
 
-        System.out.println(
-                "  DNI           : " + ocultarDni(cliente.getDni())
-        );
+        siguienteIdVenta++;
 
-        System.out.println();
-
-        System.out.println(
-                "  Producto      : "
-                + productoSeleccionado.getNombre()
-        );
-
-        System.out.println(
-                "  Cantidad      : " + cantidad
-        );
-
-        System.out.printf(
-                "  Precio unidad : S/ %.2f%n",
-                productoSeleccionado.getPrecio()
-        );
-
-        System.out.println(
-                "  ------------------------------------------"
-        );
-
-        System.out.printf(
-                "  Subtotal      : S/ %.2f%n",
-                subtotal
-        );
-
-        System.out.printf(
-                "  IGV (18%%)     : S/ %.2f%n",
-                igv
-        );
-
-        System.out.println(
-                "  ------------------------------------------"
-        );
-
-        System.out.printf(
-                "  TOTAL         : S/ %.2f%n",
-                total
-        );
+        ventas.add(venta);
 
         System.out.println();
 
         System.out.println(
-                "  [OK] Pedido registrado correctamente."
+                "========================================"
+        );
+
+        System.out.println(
+                "     VENTA REGISTRADA CORRECTAMENTE"
+        );
+
+        System.out.println(
+                "========================================"
+        );
+
+        venta.mostrarResumen();
+    }
+
+    // ========================================
+    // VALIDAR STOCK
+    // ========================================
+
+    private static boolean validarStockVenta(
+            Venta venta) {
+
+        for (DetalleVenta detalle :
+                venta.getDetalles()) {
+
+            Producto producto =
+                    detalle.getProducto();
+
+            int stock =
+                    producto.getStock();
+
+            int cantidad =
+                    detalle.getCantidad();
+
+            if (cantidad > stock) {
+
+                System.out.println();
+
+                System.out.println(
+                        "Stock insuficiente para: "
+                        + producto.getNombre()
+                );
+
+                System.out.println(
+                        "Stock actual: "
+                        + stock
+                );
+
+                System.out.println(
+                        "Cantidad solicitada: "
+                        + cantidad
+                );
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // ========================================
+    // ACTUALIZAR STOCK
+    // ========================================
+
+    private static void actualizarStock(
+            Venta venta) {
+
+        for (DetalleVenta detalle :
+                venta.getDetalles()) {
+
+            Producto producto =
+                    detalle.getProducto();
+
+            int stockActual =
+                    producto.getStock();
+
+            int cantidadVendida =
+                    detalle.getCantidad();
+
+            producto.setStock(
+                    stockActual - cantidadVendida
+            );
+        }
+    }
+
+    // ========================================
+    // OBTENER CANTIDAD EN VENTA
+    // ========================================
+
+    private static int obtenerCantidadEnVenta(
+            Venta venta,
+            Producto producto) {
+
+        int cantidadTotal = 0;
+
+        for (DetalleVenta detalle :
+                venta.getDetalles()) {
+
+            if (detalle.getProducto().getId()
+                    == producto.getId()) {
+
+                cantidadTotal +=
+                        detalle.getCantidad();
+            }
+        }
+
+        return cantidadTotal;
+    }
+
+    // ========================================
+    // LISTAR PEDIDOS
+    // ========================================
+
+    private static void listarPedidos() {
+
+        System.out.println();
+
+        System.out.println(
+                "========== LISTA DE PEDIDOS =========="
+        );
+
+        if (ventas.isEmpty()) {
+
+            System.out.println(
+                    "No hay pedidos registrados."
+            );
+
+            return;
+        }
+
+        for (Venta venta : ventas) {
+
+            System.out.println(
+                    "Pedido: "
+                    + venta.getId()
+                    + " | Cliente: "
+                    + venta.getCliente().getNombre()
+                    + " | Total: S/ "
+                    + String.format(
+                            "%.2f",
+                            venta.calcularTotal()
+                    )
+            );
+        }
+    }
+
+    // ========================================
+    // BUSCAR PEDIDO
+    // ========================================
+
+    private static void buscarPedido() {
+
+        int id = leerEntero(
+                "Ingrese ID del pedido: "
+        );
+
+        for (Venta venta : ventas) {
+
+            if (venta.getId() == id) {
+
+                venta.mostrarResumen();
+
+                return;
+            }
+        }
+
+        System.out.println(
+                "No se encontro el pedido."
         );
     }
 
-    // ==================================================
-    // 7. INFORMACION
-    // ==================================================
+    // ========================================
+    // REPORTES
+    // ========================================
+
+    private static void menuReportes() {
+
+        int opcion;
+
+        do {
+
+            System.out.println();
+
+            System.out.println(
+                    "========== REPORTES =========="
+            );
+
+            System.out.println(
+                    "1. Reporte del dia"
+            );
+
+            System.out.println(
+                    "2. Reporte general de ventas"
+            );
+
+            System.out.println(
+                    "3. Volver"
+            );
+
+            opcion = leerEntero(
+                    "Seleccione una opcion: "
+            );
+
+            switch (opcion) {
+
+                case 1 -> reporteDelDia();
+
+                case 2 -> reporteGeneral();
+
+                case 3 -> {
+                }
+
+                default ->
+                        System.out.println(
+                                "Opcion no valida."
+                        );
+            }
+
+        } while (opcion != 3);
+    }
+
+    // ========================================
+    // REPORTE DEL DIA
+    // ========================================
+
+    private static void reporteDelDia() {
+
+        LocalDate hoy =
+                LocalDate.now();
+
+        int pedidos = 0;
+
+        int productosVendidos = 0;
+
+        BigDecimal total =
+                BigDecimal.ZERO;
+
+        for (Venta venta : ventas) {
+
+            if (venta.getFecha()
+                    .toLocalDate()
+                    .equals(hoy)) {
+
+                pedidos++;
+
+                total = total.add(
+                        venta.calcularTotal()
+                );
+
+                for (DetalleVenta detalle :
+                        venta.getDetalles()) {
+
+                    productosVendidos +=
+                            detalle.getCantidad();
+                }
+            }
+        }
+
+        System.out.println();
+
+        System.out.println(
+                "========================================"
+        );
+
+        System.out.println(
+                "             REPORTE DEL DIA"
+        );
+
+        System.out.println(
+                "========================================"
+        );
+
+        System.out.println(
+                "Fecha: "
+                + hoy.format(
+                        DateTimeFormatter.ofPattern(
+                                "dd/MM/yyyy"
+                        )
+                )
+        );
+
+        System.out.println(
+                "Pedidos realizados: "
+                + pedidos
+        );
+
+        System.out.println(
+                "Productos vendidos: "
+                + productosVendidos
+        );
+
+        System.out.println(
+                "Total vendido: S/ "
+                + String.format(
+                        "%.2f",
+                        total
+                )
+        );
+
+        System.out.println(
+                "========================================"
+        );
+    }
+
+    // ========================================
+    // REPORTE GENERAL
+    // ========================================
+
+    private static void reporteGeneral() {
+
+        BigDecimal total =
+                BigDecimal.ZERO;
+
+        int productosVendidos = 0;
+
+        for (Venta venta : ventas) {
+
+            total = total.add(
+                    venta.calcularTotal()
+            );
+
+            for (DetalleVenta detalle :
+                    venta.getDetalles()) {
+
+                productosVendidos +=
+                        detalle.getCantidad();
+            }
+        }
+
+        System.out.println();
+
+        System.out.println(
+                "========== REPORTE GENERAL =========="
+        );
+
+        System.out.println(
+                "Cantidad de pedidos: "
+                + ventas.size()
+        );
+
+        System.out.println(
+                "Productos vendidos: "
+                + productosVendidos
+        );
+
+        System.out.println(
+                "Total vendido: S/ "
+                + String.format(
+                        "%.2f",
+                        total
+                )
+        );
+    }
+
+    // ========================================
+    // INFORMACION
+    // ========================================
 
     private static void mostrarInformacion() {
 
         System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |           INFORMACION DE LA LIBRERIA          |");
-        System.out.println("  ==================================================");
-
-        System.out.println();
 
         System.out.println(
-                "  Nombre       : Libreria Nova"
+                "========== INFORMACION =========="
         );
 
         System.out.println(
-                "  Tipo         : Sistema de gestion de libreria"
+                "Sistema de Libreria"
         );
 
         System.out.println(
-                "  Productos    : " + productos.size()
+                "Gestion de productos, clientes y pedidos."
         );
 
         System.out.println(
-                "  Clientes     : " + clientes.size()
-        );
-
-        System.out.println();
-
-        System.out.println(
-                "  FUNCIONES DEL SISTEMA"
+                "El sistema utiliza herencia."
         );
 
         System.out.println(
-                "  ------------------------------------------"
+                "El sistema utiliza polimorfismo."
         );
 
         System.out.println(
-                "  [1] Gestion de productos"
+                "El sistema utiliza una interfaz."
         );
 
         System.out.println(
-                "  [2] Gestion de clientes"
+                "El sistema utiliza una clase abstracta."
         );
 
         System.out.println(
-                "  [3] Registro de pedidos"
-        );
-
-        System.out.println(
-                "  [4] Calculo de IGV"
-        );
-
-        System.out.println(
-                "  [5] Validacion de datos"
-        );
-
-        System.out.println(
-                "  [6] ID automatico"
-        );
-
-        System.out.println(
-                "  [7] Proteccion de datos"
-        );
-
-        System.out.println(
-                "  ------------------------------------------"
+                "Todos los productos controlan stock."
         );
     }
 
-    // ==================================================
-    // 8. AYUDA
-    // ==================================================
+    // ========================================
+    // AYUDA
+    // ========================================
 
     private static void mostrarAyuda() {
 
         System.out.println();
-        System.out.println("  ==================================================");
-        System.out.println("  |                    AYUDA                       |");
-        System.out.println("  ==================================================");
-
-        System.out.println();
 
         System.out.println(
-                "  Los ID de clientes y productos"
+                "========== AYUDA =========="
         );
 
         System.out.println(
-                "  son generados automaticamente."
-        );
-
-        System.out.println();
-
-        System.out.println(
-                "  Los datos ingresados son validados"
+                "Use los numeros del menu para navegar."
         );
 
         System.out.println(
-                "  antes de ser registrados."
-        );
-
-        System.out.println();
-
-        System.out.println(
-                "  Los datos personales de los clientes"
+                "El DNI se solicita solamente al registrar un pedido."
         );
 
         System.out.println(
-                "  no se muestran innecesariamente."
-        );
-
-        System.out.println();
-
-        System.out.println(
-                "  El sistema inicia con:"
+                "Si el cliente tiene DNI, debe tener 8 digitos."
         );
 
         System.out.println(
-                "  - 5 productos de ejemplo"
+                "Todos los productos tienen control de stock."
         );
 
         System.out.println(
-                "  - 1 cliente registrado"
-        );
-
-        System.out.println();
-
-        System.out.println(
-                "  Los nuevos registros reciben"
+                "No se puede vender una cantidad mayor al stock."
         );
 
         System.out.println(
-                "  automaticamente el siguiente ID."
+                "Los productos con stock 0 no pueden venderse."
+        );
+
+        System.out.println(
+                "El stock solo se descuenta al confirmar la venta."
+        );
+
+        System.out.println(
+                "Si se cancela una venta, el stock no cambia."
         );
     }
 
-    // ==================================================
-    // 9. SALIR
-    // ==================================================
+    // ========================================
+    // DESPEDIDA
+    // ========================================
 
     private static void despedida() {
 
         System.out.println();
 
         System.out.println(
-                "  =================================================="
+                "========================================"
         );
 
         System.out.println(
-                "  |                                                |"
+                "     Gracias por usar el sistema."
         );
 
         System.out.println(
-                "  |        GRACIAS POR USAR LIBRERIA NOVA        |"
+                "========================================"
         );
-
-        System.out.println(
-                "  |                                                |"
-        );
-
-        System.out.println(
-                "  |              Hasta pronto!                    |"
-        );
-
-        System.out.println(
-                "  |                                                |"
-        );
-
-        System.out.println(
-                "  =================================================="
-        );
-
-        System.out.println();
     }
 
-    // ==================================================
+    // ========================================
     // LEER ENTERO
-    // ==================================================
+    // ========================================
 
-    private static int leerEntero() {
+    private static int leerEntero(
+            String mensaje) {
 
-        while (!scanner.hasNextInt()) {
+        while (true) {
 
-            System.out.println();
+            try {
 
-            System.out.println(
-                    "  [!] Ingrese un numero valido."
-            );
+                System.out.print(mensaje);
 
-            scanner.nextLine();
+                return Integer.parseInt(
+                        scanner.nextLine().trim()
+                );
 
-            System.out.print(
-                    "  Ingrese nuevamente: "
-            );
+            } catch (NumberFormatException e) {
+
+                System.out.println(
+                        "Error: ingrese un numero entero valido."
+                );
+            }
         }
-
-        int numero = scanner.nextInt();
-
-        scanner.nextLine();
-
-        return numero;
     }
 
-    // ==================================================
-    // LEER DECIMAL
-    // ==================================================
+    // ========================================
+    // ENTERO POSITIVO
+    // ========================================
 
-    private static double leerDouble() {
+    private static int leerEnteroPositivo(
+            String mensaje) {
 
-        while (!scanner.hasNextDouble()) {
+        while (true) {
 
-            System.out.println();
+            int valor =
+                    leerEntero(mensaje);
+
+            if (valor > 0) {
+                return valor;
+            }
 
             System.out.println(
-                    "  [!] Ingrese un precio valido."
-            );
-
-            scanner.nextLine();
-
-            System.out.print(
-                    "  Ingrese nuevamente: S/ "
+                    "Error: el valor debe ser mayor que cero."
             );
         }
+    }
 
-        double numero = scanner.nextDouble();
+    // ========================================
+    // ENTERO NO NEGATIVO
+    // ========================================
 
-        scanner.nextLine();
+    private static int leerEnteroNoNegativo(
+            String mensaje) {
 
-        return numero;
+        while (true) {
+
+            int valor =
+                    leerEntero(mensaje);
+
+            if (valor >= 0) {
+                return valor;
+            }
+
+            System.out.println(
+                    "Error: el stock no puede ser negativo."
+            );
+        }
+    }
+
+    // ========================================
+    // PRECIO
+    // ========================================
+
+    private static double leerPrecio(
+            String mensaje) {
+
+        while (true) {
+
+            double precio =
+                    leerDouble(mensaje);
+
+            if (Validacion.precioValido(precio)) {
+                return precio;
+            }
+
+            System.out.println(
+                    "Error: ingrese un precio mayor que cero."
+            );
+        }
+    }
+
+    // ========================================
+    // DOUBLE
+    // ========================================
+
+    private static double leerDouble(
+            String mensaje) {
+
+        while (true) {
+
+            try {
+
+                System.out.print(mensaje);
+
+                return Double.parseDouble(
+                        scanner.nextLine()
+                                .trim()
+                                .replace(',', '.')
+                );
+
+            } catch (NumberFormatException e) {
+
+                System.out.println(
+                        "Error: ingrese un numero valido."
+                );
+            }
+        }
+    }
+
+    // ========================================
+    // TEXTO
+    // ========================================
+
+    private static String leerTexto(
+            String mensaje) {
+
+        while (true) {
+
+            System.out.print(mensaje);
+
+            String texto =
+                    scanner.nextLine().trim();
+
+            if (Validacion.textoValido(texto)) {
+                return texto;
+            }
+
+            System.out.println(
+                    "Error: el valor no puede estar vacio."
+            );
+        }
     }
 }

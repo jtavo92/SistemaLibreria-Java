@@ -7,7 +7,6 @@ import com.librerianova.modelo.Producto;
 import com.librerianova.modelo.ProductoPapeleria;
 
 import com.librerianova.util.DetalleVenta;
-import com.librerianova.util.GestorArchivos;
 import com.librerianova.util.Libro;
 import com.librerianova.util.Validacion;
 import com.librerianova.util.Venta;
@@ -366,11 +365,6 @@ public class Menu {
                     libro
             );
 
-            GestorArchivos.guardarProducto(
-                    nombre,
-                    precio
-            );
-
             System.out.println(
                     "Libro registrado correctamente."
             );
@@ -400,11 +394,6 @@ public class Menu {
 
             gestorProductos.agregarProducto(
                     producto
-            );
-
-            GestorArchivos.guardarProducto(
-                    nombre,
-                    precio
             );
 
             System.out.println(
@@ -498,6 +487,8 @@ public class Menu {
                     nuevaCategoria
             );
         }
+
+        gestorProductos.actualizarProducto(producto);
 
         System.out.println(
                 "Producto actualizado correctamente."
@@ -1248,6 +1239,8 @@ public class Menu {
             producto.setStock(
                     stockActual - cantidadVendida
             );
+
+            gestorProductos.actualizarProducto(producto);
         }
     }
 

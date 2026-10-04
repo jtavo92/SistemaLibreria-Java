@@ -21,8 +21,21 @@ Desarrollar una aplicación de gestión para una librería, aplicando buenas pr�
 
 * Java
 * NetBeans
+* H2 Database en memoria
 * Git
 * GitHub
+
+## ▶️ Ejecutar desde PowerShell
+
+Desde la carpeta raíz del proyecto, compila y ejecuta con:
+
+```powershell
+javac -cp lib\h2-2.3.232.jar -d build\classes -sourcepath src src\menu\Main.java
+java -cp "build\classes;lib\h2-2.3.232.jar" menu.Main
+```
+
+H2 funciona en memoria y no requiere instalar ni iniciar un servidor. Los datos
+de productos se reinician al cerrar la aplicación.
 
 ## 👥 Integrantes
 

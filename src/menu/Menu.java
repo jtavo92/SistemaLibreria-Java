@@ -651,7 +651,25 @@ public class Menu {
          * un valor interno temporal.
          */
 
-        String dni = "00000000";
+        
+String dni;
+
+while (true) {
+    dni = leerTexto("Ingrese DNI: ");
+
+    if (!Validacion.dniValido(dni)) {
+        System.out.println("Error: el DNI debe tener 8 digitos.");
+        continue;
+    }
+
+    if (gestorClientes.existeDni(dni)) {
+        System.out.println("Error: este DNI ya esta registrado.");
+        continue;
+    }
+
+    break;
+}
+
 
         Cliente cliente = new Cliente(
                 siguienteIdCliente++,
